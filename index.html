@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TANHUTOWN v7.5</title>
+    <title>TANHUTOWN v7.1</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
@@ -13,58 +13,83 @@
         #broadcast-bar { position: fixed; top: 0; left: 0; width: 100%; background: rgba(0, 255, 65, 0.1); border-bottom: 1px solid #00ff41; height: 30px; z-index: 1000; overflow: hidden; display: flex; align-items: center; backdrop-filter: blur(5px); }
         .marquee { white-space: nowrap; animation: marquee 20s linear infinite; padding-left: 100%; font-size: 0.8em; font-weight: bold; }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
-        
         #terminal { width: 98vw; max-width: 1200px; height: 85vh; margin-top: 30px; border: 1px solid #00ff41; display: flex; flex-direction: column; background: rgba(13, 13, 13, 0.7); position: relative; z-index: 5; backdrop-filter: blur(10px); }
         #main-content { display: flex; flex: 1; overflow: hidden; }
-        
         #user-sidebar { width: 260px; border-right: 1px solid #008f11; display: flex; flex-direction: column; background: rgba(0,0,0,0.4); }
         #user-list { flex: 1; overflow-y: auto; padding: 10px; list-style: none; margin: 0; font-size: 0.85em; }
-        
-        /* Cyber Radio UI */
-        #radio-widget { border-top: 2px solid #00ccff; padding: 15px; background: rgba(0, 20, 40, 0.6); }
-        .radio-title { color: #00ccff; font-size: 0.7em; margin-bottom: 8px; font-weight: bold; text-shadow: 0 0 8px #00ccff; }
-        #radio-player { width: 100%; height: 30px; outline: none; border-radius: 5px; filter: invert(1) hue-rotate(180deg) brightness(1.5); }
-
         #overseer-panel { border-top: 1px solid #ff00ff; padding: 10px; display: none; background: rgba(20, 0, 20, 0.5); font-size: 0.7em; }
+        .private-room-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px dashed #440044; }
+        .private-room-link { color: #ff00ff; cursor: pointer; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .room-del-btn { color: #ff0000; cursor: pointer; font-weight: bold; margin-left: 10px; font-size: 1.2em; }
+        #banned-archive { height: 120px; border-top: 1px solid #ff0000; background: rgba(20, 0, 0, 0.4); display: none; flex-direction: column; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .online { background: #00ff41; box-shadow: 0 0 8px #00ff41; }
+        .offline { background: #444; }
         #admin-context-menu { display: none; position: fixed; background: #0d0d0d; border: 1px solid #00ff41; z-index: 3000; width: 220px; box-shadow: 5px 5px 20px black; }
         .context-item { padding: 12px; font-size: 0.75em; cursor: pointer; font-weight: bold; border-bottom: 1px solid #1a1a1a; }
-        .item-radio { color: #00ccff; } .item-ban { color: #ff0000; } .item-priv { color: #ff00ff; }
-
-        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .log-line { font-size: 0.85em; line-height: 1.4; border-bottom: 1px solid rgba(0, 255, 65, 0.05); padding-bottom: 4px; }
-        #input-line { display: flex; gap: 10px; border-top: 1px solid #008f11; padding: 10px; }
-        #message-input { flex: 1; background: transparent; border: none; color: #00ff41; outline: none; }
-        #send-btn { background: #00ff41; border: none; padding: 8px 15px; cursor: pointer; color: #000; font-weight: bold; }
-        #login-screen { position: absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index:4000; display:flex; justify-content:center; align-items:center; }
+        .item-ban { color: #ff0000; } .item-del { color: #ffaa00; } .item-msg { color: #00ccff; } .item-bcast { color: #00ff41; } .item-private { color: #ff00ff; }
+        #messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 15px; }
+        .log-line { line-height: 1.4; font-size: 0.85em; }
+        .chat-img { max-width: 250px; border: 1px solid #00ff41; margin-top: 5px; cursor: pointer; }
+        #input-line { display: flex; align-items: center; gap: 10px; border-top: 1px solid #008f11; padding: 10px; }
+        #message-input { flex: 1; background: transparent; border: none; color: #00ff41; outline: none; font-family: 'Fira Code'; }
+        #send-btn { background: #00ff41; border: none; padding: 8px 20px; font-weight: bold; cursor: pointer; color: black; }
+        .channel-btn { padding: 5px 10px; border: 1px solid #00ff41; cursor: pointer; font-size: 0.7em; color: #00ff41; background: transparent; }
+        .channel-btn.active { background: #00ff41; color: black; }
+        #login-screen, #ban-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; justify-content: center; align-items: center; z-index: 4000; flex-direction: column; }
     </style>
 </head>
 <body>
 
-<div id="broadcast-bar"><div class="marquee" id="broadcast-text">TANHUTOWN v7.5 GÜVENLİ RADYO PROTOKOLÜ...</div></div>
+<div id="broadcast-bar"><div class="marquee" id="broadcast-text">TANHUTOWN v7.1 AKTİF...</div></div>
 
 <div id="admin-context-menu">
-    <div class="context-item item-radio" id="btn-ctx-radio">RADYOYU GÜNCELLE</div>
     <div class="context-item item-ban" id="btn-ctx-ban">BİRİMİ MÜHÜRLE</div>
-    <div class="context-item item-priv" id="btn-ctx-priv">ARKA ODAYA GEÇELİM</div>
+    <div class="context-item item-del" id="btn-ctx-del">VERİLERİ SİL</div>
+    <div class="context-item item-msg" id="btn-ctx-msg">MESAJI İMHA ET</div>
+    <div class="context-item item-bcast" id="btn-ctx-bcast">DUYURU YAYINLA</div>
+    <div class="context-item item-private" id="btn-ctx-private">ARKA ODAYA GEÇELİM</div>
 </div>
 
 <div id="terminal">
+    <div id="ban-screen"><h1>[ ERİŞİM ENGELLENDİ ]</h1></div>
     <div id="login-screen">
-        <input type="text" id="username-input" placeholder="Rumuz girin..." style="background:transparent; border:none; border-bottom:1px solid #00ff41; color:#00ff41; text-align:center; outline:none; font-family:'Fira Code';">
+        <div style="border: 1px solid #00ff41; padding: 40px; background: #0d0d0d; text-align: center;">
+            <p>> TANHUTOWN v7.1</p>
+            <input type="text" id="username-input" placeholder="Rumuz..." style="background:transparent; border:none; border-bottom:1px solid #00ff41; color:#00ff41; outline:none; text-align:center;" autocomplete="off">
+        </div>
     </div>
 
     <div id="main-content">
         <aside id="user-sidebar">
+            <div style="padding:10px; font-size:0.7em; border-bottom:1px solid #008f11; color:#00ff41;">> BIRIM_LISTESI</div>
             <ul id="user-list"></ul>
-            <div id="overseer-panel"></div>
-            <div id="radio-widget">
-                <div class="radio-title">TANHU FM 104.0</div>
-                <audio id="radio-player" controls preload="auto" crossorigin="anonymous"></audio>
+            <div id="overseer-panel">
+                <div style="color:#ff00ff; margin-bottom:5px; font-weight:bold;">[ AKTİF ARKA ODALAR ]</div>
+                <div id="active-rooms-list"></div>
+            </div>
+            <div id="banned-archive">
+                <div id="archive-header" style="padding:5px; font-size:0.6em; color:red;">MÜHÜRLÜ_ARŞİV</div>
+                <ul id="banned-list"></ul>
             </div>
         </aside>
+
         <section id="chat-area" style="display:flex; flex-direction:column; flex:1;">
+            <div style="display:flex; justify-content: space-between; padding:10px; border-bottom:1px solid #008f11;">
+                <div style="display:flex; gap:10px; align-items: center;">
+                    <button id="nav-lobi" class="channel-btn active" onclick="switchRoom('lobi')">[ LOBİ ]</button>
+                    <button id="nav-lord" class="channel-btn" onclick="switchRoom('lord')">[ LORD'UN SALONU ]</button>
+                    <button id="nav-private" class="channel-btn" style="display:none; color:#ff00ff; border-color:#ff00ff;" onclick="switchRoom(currentPrivateRoom)">[ ÖZEL ODA ]</button>
+                    <label id="btn-set-bg" for="inp-bg" style="display:none; cursor:pointer; font-size:0.6em; border:1px solid #ff0055; padding:4px; color:#ff0055;">SET_BG</label>
+                    <input type="file" id="inp-bg" accept="image/*" style="display:none;">
+                </div>
+                <span onclick="logout()" style="cursor:pointer; color:#ff0000; font-size:0.7em;">[LOGOUT]</span>
+            </div>
             <div id="messages"></div>
             <div id="input-line">
+                <span id="prompt-label" style="font-size:0.8em;">user@town:~$</span>
+                <label for="inp-foto" style="cursor:pointer; color:#00ff41; border:1px solid #00ff41; padding:4px; font-size:0.7em;">FOTO</label>
+                <input type="file" id="inp-foto" accept="image/*" style="display:none;">
                 <input type="text" id="message-input" autocomplete="off">
                 <button id="send-btn" onclick="sendMessage()">İLET</button>
             </div>
@@ -77,108 +102,211 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let currentUser = localStorage.getItem('chatUser');
-    let isAdmin = false;
     let deviceId = localStorage.getItem('tanhutown_device_id') || 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase();
     localStorage.setItem('tanhutown_device_id', deviceId);
 
+    let currentRoom = 'lobi';
+    let currentUser = localStorage.getItem('chatUser');
+    let isAdmin = false;
+    let currentPrivateRoom = null;
+
+    function processLogin(name) {
+        if (!name) return;
+        const cleanName = name.trim().toUpperCase();
+        if (cleanName === "TANHU") {
+            const key = prompt("TANHU_KEY:");
+            if (key === "3169") { currentUser = "TANHU"; localStorage.setItem('chatUser', "TANHU"); startApp(); }
+            else { alert("ERİŞİM REDDEDİLDİ."); }
+            return;
+        }
+        db.ref('banned_devices/' + deviceId).once('value', snap => {
+            if (snap.exists()) { document.getElementById('ban-screen').style.display = 'flex'; document.getElementById('login-screen').style.display = 'none'; }
+            else { currentUser = cleanName; localStorage.setItem('chatUser', cleanName); startApp(); }
+        });
+    }
+
     function startApp() {
         document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('ban-screen').style.display = 'none';
         isAdmin = (currentUser === "TANHU");
-        
-        // RADYO GÜNCELLEME (KRİTİK FİX)
-        db.ref('settings/radio_url').on('value', snap => {
-            const player = document.getElementById('radio-player');
-            const url = snap.val();
-            if (url) {
-                player.pause();
-                player.src = url;
-                player.load();
-                // Kullanıcı bir kez sayfaya tıkladıysa çalmaya başlar
-                const playPromise = player.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.log("Oynatma için kullanıcı etkileşimi gerekiyor.");
-                    });
+        if (isAdmin) {
+            document.getElementById('banned-archive').style.display = 'flex';
+            document.getElementById('overseer-panel').style.display = 'block';
+        }
+
+        const userRef = db.ref('users/' + currentUser);
+        userRef.update({ status: 'online', lastDev: deviceId });
+        userRef.onDisconnect().update({ status: 'offline' });
+
+        db.ref('users/' + currentUser + '/invites').on('value', snap => {
+            const inv = snap.val();
+            if (inv && inv.from !== currentUser) {
+                if (confirm(inv.from + " seninle arka odaya geçmek istiyor. Gidilsin mi?")) {
+                    currentPrivateRoom = inv.room;
+                    document.getElementById('nav-private').style.display = 'block';
+                    switchRoom(inv.room);
                 }
+                db.ref('users/' + currentUser + '/invites').remove();
             }
         });
 
-        listenLists(); loadMessages();
+        if (isAdmin) {
+            db.ref('active_private_rooms').on('value', snap => {
+                const list = document.getElementById('active-rooms-list');
+                list.innerHTML = '';
+                const rooms = snap.val() || {};
+                for (let r in rooms) {
+                    const item = document.createElement('div');
+                    item.className = 'private-room-item';
+                    const link = document.createElement('span');
+                    link.className = 'private-room-link';
+                    link.textContent = "> " + r.replace('private_', '').replace('_', ' & ');
+                    link.onclick = () => { currentPrivateRoom = r; document.getElementById('nav-private').style.display = 'block'; switchRoom(r); };
+                    const del = document.createElement('span');
+                    del.className = 'room-del-btn';
+                    del.textContent = '×';
+                    del.onclick = (e) => { e.stopPropagation(); if(confirm("Odayı imha et?")) { db.ref('active_private_rooms/'+r).remove(); db.ref(r).remove(); } };
+                    item.appendChild(link); item.appendChild(del);
+                    list.appendChild(item);
+                }
+            });
+        }
+        document.getElementById('prompt-label').textContent = `${currentUser.toLowerCase()}@town:~$`;
+        listenLists(); loadMessages(); listenWallpaper();
+    }
+
+    function listenLists() {
+        db.ref().on('value', snap => {
+            const listContainer = document.getElementById('user-list');
+            listContainer.innerHTML = '';
+            const users = snap.child('users').val() || {};
+            const banned = snap.child('banned_devices').val() || {};
+            const archiveContainer = document.getElementById('banned-list');
+            archiveContainer.innerHTML = '';
+            for(let name in users) {
+                const uData = users[name];
+                if(banned[uData.lastDev]) continue;
+                const li = document.createElement('li');
+                li.style.padding = '8px 5px';
+                li.innerHTML = `<span class="status-dot ${uData.status==='online'?'online':'offline'}"></span> <span>${name}</span>`;
+                li.oncontextmenu = (e) => showMenu(e, 'user', {name, dev: uData.lastDev});
+                listContainer.appendChild(li);
+            }
+            if(isAdmin) {
+                for(let bid in banned) {
+                    const li = document.createElement('li');
+                    li.className = 'banned-item';
+                    li.innerHTML = `<span>${banned[bid].user}</span> <span class="unban-btn" onclick="db.ref('banned_devices/${bid}').remove()">[X]</span>`;
+                    archiveContainer.appendChild(li);
+                }
+            }
+        });
     }
 
     function showMenu(e, type, data) {
         e.preventDefault();
         const menu = document.getElementById('admin-context-menu');
-        const b = { 
-            rad: document.getElementById('btn-ctx-radio'),
-            ban: document.getElementById('btn-ctx-ban'),
-            priv: document.getElementById('btn-ctx-priv')
-        };
+        const b = { ban: document.getElementById('btn-ctx-ban'), del: document.getElementById('btn-ctx-del'), msg: document.getElementById('btn-ctx-msg'), bc: document.getElementById('btn-ctx-bcast'), priv: document.getElementById('btn-ctx-private') };
         Object.values(b).forEach(i => i.style.display = 'none');
 
-        if (isAdmin) {
-            b.rad.style.display = 'block';
-            b.rad.onclick = () => {
-                const url = prompt("ÇALIŞAN BİR RADYO URL (Mutlaka HTTPS önerilir):", "https://shaincast.fastcast4u.com/proxy/dzmlyp_sh?mp=/stream");
-                if (url) db.ref('settings/radio_url').set(url);
-            };
-            if(type === 'user') b.ban.style.display = 'block';
+        if(type === 'user') {
+            // Admin Menüsü: Tanhu ise ve hedef o anki aktif deviceId değilse (veya her türlü) seçenekleri göster
+            if (isAdmin) {
+                b.ban.style.display = 'block'; 
+                b.del.style.display = 'block';
+                b.ban.onclick = () => { if(confirm(data.name + " BANLANSIN MI?")) db.ref('banned_devices/'+data.dev).set({user:data.name}); menu.style.display='none'; };
+                b.del.onclick = () => { if(confirm(data.name + " VERİLERİ SİLİNSİN MI?")) db.ref('users/'+data.name).remove(); menu.style.display='none'; };
+            }
+            // Özel Oda Daveti
+            if (data.name !== currentUser) {
+                b.priv.style.display = 'block';
+                b.priv.onclick = () => {
+                    const roomID = "private_" + [currentUser, data.name].sort().join("_");
+                    db.ref('active_private_rooms/' + roomID).set(true);
+                    db.ref('users/' + data.name + '/invites').set({ from: currentUser, room: roomID });
+                    currentPrivateRoom = roomID;
+                    document.getElementById('nav-private').style.display = 'block';
+                    switchRoom(roomID);
+                    menu.style.display='none';
+                };
+            }
+        } else if(type === 'msg' && isAdmin) {
+            b.msg.style.display = 'block';
+            b.msg.onclick = () => { if(confirm("İMHA?")) db.ref(currentRoom+'/'+data.id).remove(); menu.style.display='none'; };
+        } else if(type === 'bcast' && isAdmin) {
+            b.bc.style.display = 'block';
+            b.bc.onclick = () => { let n = prompt("DUYURU:"); if(n) db.ref('settings/broadcast').set(n.toUpperCase()); menu.style.display='none'; };
         }
-        if(type === 'user' && data.name !== currentUser) b.priv.style.display = 'bold';
-
         menu.style.display = 'block'; menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px';
     }
 
-    // Çalışan radyo linklerini denemen için şu ikisini Lord panelinden girebilirsin:
-    // 1. https://shaincast.fastcast4u.com/proxy/dzmlyp_sh?mp=/stream (Slow Türk tarzı)
-    // 2. https://n10101.ottstream.ot.io/joyfm/tracks.m3u8 (Joy FM)
+    function switchRoom(room) {
+        if(room === 'lord' && !isAdmin && prompt("ŞİFRE:") !== "80085") return;
+        db.ref(currentRoom).off();
+        currentRoom = room;
+        document.getElementById('btn-set-bg').style.display = (isAdmin && room==='lord') ? 'block' : 'none';
+        document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+        if(room === currentPrivateRoom) document.getElementById('nav-private').style.display = 'block', document.getElementById('nav-private').classList.add('active');
+        else if(document.getElementById('nav-'+room)) document.getElementById('nav-'+room).classList.add('active');
+        loadMessages(); listenWallpaper();
+    }
 
     function loadMessages() {
-        db.ref('lobi').on('value', snap => {
-            const container = document.getElementById('messages'); container.innerHTML = '';
+        db.ref(currentRoom).on("value", snap => {
+            const container = document.getElementById('messages');
+            container.innerHTML = '';
             const data = snap.val();
+            if(data === null && currentRoom.includes('private')) {
+                db.ref('active_private_rooms/'+currentRoom).once('value', s => {
+                    if(!s.exists()) { document.getElementById('nav-private').style.display = 'none'; switchRoom('lobi'); }
+                });
+            }
+            if(!data) { container.innerHTML = '<div style="color:#333; font-size:0.7em;">> Mesaj bekleniyor...</div>'; return; }
             for(let id in data) {
                 const m = data[id];
-                const div = document.createElement('div'); div.className = 'log-line';
-                div.innerHTML = `<b>${m.gonderen}</b>: ${m.mesaj}`;
+                if(!m.gonderen) continue;
+                const div = document.createElement('div');
+                div.className = 'log-line';
+                let html = `[${new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}] <b style="${m.gonderen==='TANHU'?'color:#4ecca3':''}">${m.gonderen}</b>: `;
+                if(m.foto) html += `<br><img src="${m.foto}" class="chat-img" onclick="window.open(this.src)">`;
+                else html += `<span>${m.mesaj}</span>`;
+                div.innerHTML = html;
+                div.oncontextmenu = (e) => { if(isAdmin) showMenu(e, 'msg', {id}); };
                 container.appendChild(div);
             }
             container.scrollTop = container.scrollHeight;
         });
     }
 
-    function listenLists() {
-        db.ref('users').on('value', snap => {
-            const list = document.getElementById('user-list'); list.innerHTML = '';
-            const users = snap.val() || {};
-            for(let name in users) {
-                const li = document.createElement('li');
-                li.innerHTML = `<span class="status-dot online"></span> ${name}`;
-                li.oncontextmenu = (e) => showMenu(e, 'user', {name});
-                list.appendChild(li);
-            }
+    function listenWallpaper() {
+        db.ref('settings/lord_wallpaper').on('value', s => {
+            document.body.style.backgroundImage = (currentRoom === 'lord' && s.exists()) ? `url(${s.val()})` : "none";
         });
     }
 
     function sendMessage() {
         const val = document.getElementById('message-input').value;
         if(val.trim()) {
-            db.ref('lobi').push({gonderen:currentUser, mesaj:val, timestamp: Date.now()});
+            db.ref(currentRoom).push({gonderen:currentUser, mesaj:val, timestamp:firebase.database.ServerValue.TIMESTAMP});
             document.getElementById('message-input').value = '';
         }
     }
 
-    document.getElementById('username-input').onkeypress = (e) => {
-        if(e.key === 'Enter') {
-            const n = e.target.value.trim().toUpperCase();
-            if(n === "TANHU") {
-                if(prompt("KEY:") === "3169") { currentUser = n; startApp(); }
-            } else { currentUser = n; startApp(); }
-        }
+    document.getElementById('username-input').onkeypress = (e) => { if(e.key === 'Enter') processLogin(e.target.value.trim()); };
+    document.getElementById('broadcast-bar').oncontextmenu = (e) => showMenu(e, 'bcast');
+    db.ref('settings/broadcast').on('value', s => { if(s.exists()) document.getElementById('broadcast-text').textContent = s.val(); });
+    document.getElementById('inp-foto').onchange = (e) => {
+        const r = new FileReader(); r.onload = (ev) => db.ref(currentRoom).push({gonderen:currentUser, foto:ev.target.result, timestamp:firebase.database.ServerValue.TIMESTAMP});
+        r.readAsDataURL(e.target.files[0]);
     };
-    if(currentUser) startApp();
+    if(currentUser) processLogin(currentUser);
     window.onclick = () => document.getElementById('admin-context-menu').style.display = 'none';
+    document.getElementById('message-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+    function logout() { if(currentUser) db.ref('users/'+currentUser).update({status:'offline'}); localStorage.removeItem('chatUser'); location.reload(); }
+    document.getElementById('inp-bg').onchange = (e) => {
+        const r = new FileReader(); r.onload = (ev) => db.ref('settings/lord_wallpaper').set(ev.target.result);
+        r.readAsDataURL(e.target.files[0]);
+    };
 </script>
 </body>
 </html>
